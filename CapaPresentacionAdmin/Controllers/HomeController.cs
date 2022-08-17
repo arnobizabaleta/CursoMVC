@@ -24,7 +24,7 @@ namespace CapaPresentacionAdmin.Controllers
             List<USUARIO> oLista = new List<USUARIO>();
             oLista = new CN_USUARIOS().Listar();
 
-            return Json(new { elemento = oLista, estado = true}, JsonRequestBehavior.AllowGet);
+            return Json( oLista, JsonRequestBehavior.AllowGet);
         }
 
 
