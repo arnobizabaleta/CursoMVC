@@ -13,12 +13,18 @@ namespace CapaPresentacionAdmin
 
             bundles.Add(new Bundle("~/bundles/complementos").Include(
                 "~/Scripts/fontawesome/all.min.js",
+                "~/Scripts/DataTables/jquery.dataTables.js",
+                 "~/Scripts/DataTables/jquery.responsive.js",
                 "~/Scripts/scripts.js"));
 
             bundles.Add(new Bundle("~/bundles/bootstrap").Include(
                       "~/Scripts/bootstrap.bundle.js"));
 
-            bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/Site.css"));
+            bundles.Add(new StyleBundle("~/Content/css").Include(
+                "~/Content/Site.css",
+                "~/Content/DataTables/css/jquery.dataTables.css",
+                "~/Content/DataTables/css/responsive.dataTables.css"
+                ));
 
 
         }

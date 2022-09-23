@@ -17,7 +17,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-12">
-                <button type="button" class="btn btn-success">Crear Nuevo</button>
+                <button type="button" class="btn btn-success" onclick="abrirModal(null)">Crear Nuevo</button>
             </div>
         </div>
         <hr />
@@ -28,29 +28,211 @@
                     <th>Apellidos</th>
                     <th>Correo</th>
                     <th>Activo</th>
+                    <th></th>
+
                 </tr>
             </thead>
             <tbody>
-                
-                
             </tbody>
         </table>
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="FormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden"  value="0"/>
+
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <label for="txtnombres" class="form-label">Nombres</label>
+                        <input type="text" class="form-control" id="txtnombres" autocomplete="off" required="">
+
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="txtapellidos" class="form-label">Apellidos</label>
+                        <input type="text" class="form-control" id="txtapellidos" autocomplete="off" required="">
+
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="txtcorreo" class="form-label">Correo</label>
+                        <input type="email" class="form-control" id="txtcorreo" autocomplete="off" required="">
+
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label for="cboactivo" class="form-label">Áctivo</label>
+                        <select class="form-select" id="cboactivo" required="">
+                            <!--<option selected>Open this select menu</option> -->
+                            <option value="1">Si</option>
+                            <option value="0">No</option>
+
+                        </select>
+
+                    </div>
+
+
+                </div>
+
+                <div class="row">
+                    <div id="mensajeError" class="alert alert-danger mt-2" role="alert">
+                        A simple primary alert—check it out!
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="Guardar()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @section scripts
 {
     <script>
-        jQuery.ajax({
-            url: '@Url.Action("ListarUsuarios", "Home")',
-            type: 'GET',
-            dataType: "json",
-            contentType: 'application/json; charset=utf-8',
-            success: function (data) {
-                debugger;
-                var texto1 = "Hola soy un texto 1"
-                console.log(data)
+        //Variables globales
+        var tabladata;
+        var filaSeleccionada;
+
+        tabladata = $('#tabla').DataTable({//Convertiendo la Tabla COnvencional en DATATABLE
+            responsive: true,
+            ordering: false,
+            "ajax": {
+                 url: '@Url.Action("ListarUsuarios", "Home")',
+                type: 'GET',
+                dataType: "json"
+            },
+            "columns": [
+                { "data": "NOMBRES" },
+                { "data": "APELLIDOS" },
+                { "data": "CORREO" },
+                {
+                    "data": "ACTIVO", "render": function (valor) {
+                        if (valor) {
+                            return '<span class="badge bg-success">Si</span>';
+                            //return '<span class="badge badge-success">Si</span>';
+                        } else {
+                            return '<span class="badge bg-danger">No</span>';
+                            //return '<span class="badge badge-danger">No</span>';
+                        }
+                    }
+                },
+                {
+                    "defaultContent": '<button type="button" class="btn btn-primary btn-sm btn-editar"> <i class="fas fa-pen"></i></button>' +
+                        '<button type="button" class="btn btn-danger btn-sm ms-2"> <i class="fas fa-trash"></i></button>',
+                    "orderable": false,
+                    "searchable": false,
+                    "width":"90px"
+                }
+            ],
+            "language": {
+                url: "https://cdn.datatables.net/plug-ins/1.12.1/i18n/es-ES.json"
             }
+
+
+
+        });
+
+        function abrirModal(json) {
+
+            $("#txtid").val(0);
+            $("#txtnombres").val("");
+            $("#txtapellidos").val("");
+            $("#txtcorreo").val("");
+            $("#cboactivo").val("");
+            $("#mensajeError").hide();
+           
+            if (json != null) {
+                //Tiene datos o valores el método
+                $("#txtid").val(json.ID_USUARIO);
+                $("#txtnombres").val(json.NOMBRES);
+                $("#txtapellidos").val(json.APELLIDOS);
+                $("#txtcorreo").val(json.CORREO);
+                $("#cboactivo").val(json.ACTIVO == true ? 1 : 0);
+            }
+
+            $("#FormModal").modal("show");
+        }
+
+        $("#tabla tbody").on("click", ".btn-editar", function () {
+            filaSeleccionada = $(this).closest("tr");
+            var data = tabladata.row(filaSeleccionada).data();
+           // console.log(data);
+            abrirModal(data);
         })
+
+        function Guardar() {
+
+            var Usuario = {
+                ID_USUARIO: $("#txtid").val(),
+                ACTIVO: $("#cboactivo").val() == 1 ? true: false,
+                APELLIDOS: $("#txtapellidos").val(),
+                CORREO: $("#txtcorreo").val(),
+                NOMBRES: $("#txtnombres").val(),
+
+            }
+            
+            jQuery.ajax({
+                url: '@Url.Action("GuardarUsuario", "Home")',
+                type: 'POST',
+                data: JSON.stringify({objeto : Usuario}),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+
+                    //debugger;
+                    
+                    //Usuario Nuevo
+                    if (Usuario.ID_USUARIO == 0) {
+                        //Si el ID(Data) retornado(AutoGenerado) es distinto de cero
+                        if (data.resultado != 0) {
+                            Usuario.ID_USUARIO == data.resultado;
+                            //Dibujando en una nueva  fila ia info del nuevo usuario
+                            tabladata.row.add(Usuario).draw(false);
+                            //Ocultando modal luego de guardar la info
+                            $("#FormModal").modal("hide");
+                        } else {
+                            $("#mensajeError").text(data.mensaje);
+                            $("#mensajeError").show();
+                            
+                        }
+                      
+                    } else { //Usuario EDITAR
+                        // alert("Editar Usuario")
+                        if (data.resultado) {
+                            tabladata.row(filaSeleccionada).data(Usuario).draw(false);
+                            filaSeleccionada = null; //LIMPIANDO FILA SELECCIONADA
+                            $("#FormModal").modal("hide");
+                        } else {
+                            $("#mensajeError").text(data.mensaje);
+                            $("#mensajeError").show();
+
+                        }
+                        
+                       
+                        
+                    }
+                },
+                error: function (error) {
+                    console.log(error)
+                },
+                beforeSend: function () {
+
+                }
+            
+
+            });
+
+           
+        }
+
+
+        
     </script>
-    }
+}
