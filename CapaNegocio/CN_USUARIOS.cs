@@ -37,24 +37,53 @@ namespace CapaNegocio
             if (string.IsNullOrEmpty(mensaje))
             {
                 string clave = CN_Recursos.GenerarClave();
-                string asunto = "Creación de cuenta";
-                string mensaje_correo = "<h3> Su cuenta fue creada correctamente </h3> </br> <p> Su contraseña para acceder es ¡clave!</p>";
-                mensaje_correo = mensaje_correo.Replace("¡clave!", clave);
-
-                bool respuesta = CN_Recursos.EnviarCorreo(obj.CORREO, asunto, mensaje_correo);
-
-                if (respuesta)
+                obj.CLAVE = CN_Recursos.ConvertirSha256(clave);
+                int idNuevoUsuario;
+                idNuevoUsuario = objCapaDato.Registrar(obj, out mensaje);
+                    if(idNuevoUsuario> 0)
                 {
-                    obj.CLAVE = CN_Recursos.ConvertirSha256(clave);
-                    return objCapaDato.Registrar(obj, out mensaje);
+                    string asunto = "Creación de cuenta";
+                    string mensaje_correo = "<h3> Su cuenta fue creada correctamente </h3> </br> <p> Su contraseña para acceder es ¡clave!</p>";
+                    mensaje_correo = mensaje_correo.Replace("¡clave!", clave);
+                    bool respuesta = CN_Recursos.EnviarCorreo(obj.CORREO, asunto, mensaje_correo);
+                    if (respuesta)
+                    {//Correo enviado
+                        return idNuevoUsuario;
+                    }
+                    else
+                    {
+                        mensaje = "No se puede enviar el correo";
+                        return 0;
+                    }
+                    
+                  
                 }
                 else
                 {
-                    mensaje = "No se puede enviar el correo";
-                    return 0;
+                    return 0;//Usuario no registrado
                 }
                 
-                
+
+                //Logica vieja: Envía correo aunque el usuario no haya sido guardado por repiticion de correo
+                //string clave = CN_Recursos.GenerarClave();
+                //string asunto = "Creación de cuenta";
+                //string mensaje_correo = "<h3> Su cuenta fue creada correctamente </h3> </br> <p> Su contraseña para acceder es ¡clave!</p>";
+                //mensaje_correo = mensaje_correo.Replace("¡clave!", clave);
+
+                //bool respuesta = CN_Recursos.EnviarCorreo(obj.CORREO, asunto, mensaje_correo);
+
+                //if (respuesta)
+                //{
+                //    obj.CLAVE = CN_Recursos.ConvertirSha256(clave);
+                //    return objCapaDato.Registrar(obj, out mensaje);
+                //}
+                //else
+                //{
+                //    mensaje = "No se puede enviar el correo";
+                //    return 0;
+                //}
+
+
             }
             else
             {
