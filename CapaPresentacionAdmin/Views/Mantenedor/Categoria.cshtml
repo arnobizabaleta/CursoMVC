@@ -130,18 +130,14 @@
         function abrirModal(json) {
 
             $("#txtid").val(0);
-            $("#txtnombres").val("");
-            $("#txtapellidos").val("");
-            $("#txtcorreo").val("");
+            $("#txtdescripcion").val("");
             $("#cboactivo").val("");
             $("#mensajeError").hide();
 
             if (json != null) {
                 //Tiene datos o valores el método
-                $("#txtid").val(json.ID_USUARIO);
-                $("#txtnombres").val(json.NOMBRES);
-                $("#txtapellidos").val(json.APELLIDOS);
-                $("#txtcorreo").val(json.CORREO);
+                $("#txtid").val(json.ID_CATEGORIA);
+                $("#txtdescripcion").val(json.DESCRIPCION);
                 $("#cboactivo").val(json.ACTIVO == true ? 1 : 0);
             }
 
@@ -156,12 +152,12 @@
         })
 
         $("#tabla tbody").on("click", ".btn-eliminar", function () {
-            var usuarioSeleccionado = $(this).closest("tr");
-            var data = tabladata.row(usuarioSeleccionado).data();
+            var categoriaSeleccionada = $(this).closest("tr");
+            var data = tabladata.row(categoriaSeleccionada).data();
 
             swal({
                 title: "Está seguro?",
-                text: "¿Desea eliminar el usuario?",
+                text: "¿Desea eliminar la categoría?",
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonClass: "btn-primary",
@@ -172,15 +168,15 @@
                 function () {
 
                     jQuery.ajax({
-                        url: '@Url.Action("EliminarUsuario", "Home")',
+                        url: '@Url.Action("EliminarCategoria", "Mantenedor")',
                         type: 'POST',
-                        data: JSON.stringify({ id: data.ID_USUARIO }),
+                        data: JSON.stringify({ id: data.ID_CATEGORIA }),
                         dataType: "json",
                         contentType: "application/json; charset=utf-8",
                         success: function (data) {
                             //debugger;
                             if (data.resultado) {
-                                tabladata.row(usuarioSeleccionado).remove().draw();
+                                tabladata.row(categoriaSeleccionada).remove().draw();
                             } else {
                                 swal("No sé pudo eliminar", data.mensaje, "error");
                             }
@@ -197,19 +193,19 @@
 
         function Guardar() {
 
-            var Usuario = {
-                ID_USUARIO: $("#txtid").val(),
-                ACTIVO: $("#cboactivo").val() == 1 ? true: false,
-                APELLIDOS: $("#txtapellidos").val(),
-                CORREO: $("#txtcorreo").val(),
-                NOMBRES: $("#txtnombres").val(),
+            var Categoria = {
+                ID_CATEGORIA: $("#txtid").val(),
+                DESCRIPCION: $("#txtdescripcion").val(),
+                ACTIVO: $("#cboactivo").val() == 1 ? true : false,
+                
+              
 
             }
 
             jQuery.ajax({
-                url: '@Url.Action("GuardarUsuario", "Home")',
+                url: '@Url.Action("GuardarCategoria", "Mantenedor")',
                 type: 'POST',
-                data: JSON.stringify({objeto : Usuario}),
+                data: JSON.stringify({ objeto: Categoria }),
                 dataType: "json",
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
@@ -217,13 +213,13 @@
                     $(".modal-body").LoadingOverlay("hide");
                     //debugger;
 
-                    //Usuario Nuevo
-                    if (Usuario.ID_USUARIO == 0) {
+                    //Categoria Nueva
+                    if (Categoria.ID_CATEGORIA == 0) {
                         //Si el ID(Data) retornado(AutoGenerado) es distinto de cero
                         if (data.resultado != 0) {
-                            Usuario.ID_USUARIO == data.resultado;
-                            //Dibujando en una nueva  fila ia info del nuevo usuario
-                            tabladata.row.add(Usuario).draw(false);
+                            Categoria.ID_CATEGORIA == data.resultado;
+                            //Dibujando en una nueva  fila ia info de LA NUEVA CATEGORIA
+                            tabladata.row.add(Categoria).draw(false);
                             //Ocultando modal luego de guardar la info
                             $("#FormModal").modal("hide");
                         } else {
@@ -232,10 +228,10 @@
 
                         }
 
-                    } else { //Usuario EDITAR
-                        // alert("Editar Usuario")
+                    } else { //CATEGORIA EDITAR
+                        // alert("Editar Categoria")
                         if (data.resultado) {
-                            tabladata.row(filaSeleccionada).data(Usuario).draw(false);
+                            tabladata.row(filaSeleccionada).data(Categoria).draw(false);
                             filaSeleccionada = null; //LIMPIANDO FILA SELECCIONADA
                             $("#FormModal").modal("hide");
                         } else {
